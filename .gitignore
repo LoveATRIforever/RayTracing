@@ -1,0 +1,9 @@
+.vs
+bin
+bin-int
+*.user
+*.sln
+*.vcxproj
+*.filters
+*.hdr
+*.jpg

@@ -1,0 +1,390 @@
+注意在标准化设备坐标系中OpenGL实际上使用的是左手坐标系（投影矩阵交换了左右手）
+
+L02
+
+1.向量
+	默认列向量（所有的矩阵可以左乘）
+	1.1 向量点乘
+		方向间的距离，是否同向，投影
+	1.2 向量叉乘
+		a x b = -b x a
+		|a x b| = |a||b|sin(a,b夹角)
+		方向满足右手螺旋定则
+		
+		a x b = (YaZb - YbZa, ZaXb - XaZb, XaYb - YaXb)T
+		a x b = A*b =|0 -z y|
+					 |z 0 -x| * b
+					 |-y x 0|
+		计算同时垂直于两个向量的新向量
+		判断左右和内外
+		
+2.矩阵
+
+
+L03
+
+1.变换（矩阵）
+	1.1 缩放 S
+		|Sx 0  0 |
+		|0  Sy 0 |
+		|0  0  Sz|
+	1.2 错切 H
+		|1 0 k|
+		|0 1 0|  使用z错切x
+		|0 0 1|
+		根据k的位置决定 i行j列 i->被剪切 j->根据这个分量剪切  
+	1.3 旋转 R
+		|cos 0 -sin|
+		|0   0    0| x->y
+		|sin 0  cos|
+		由-sin所在位置决定 从所在行转向所在列
+		R(-1) = R(T) 正交矩阵
+	1.4 平移
+		|1 0 0 x|
+		|0 1 0 y|	移动（x,y,z）
+		|0 0 1 Z|	
+		|0 0 0 1|
+2.其次坐标
+	w == 0 为向量（方向）
+	w != 0 为点(先通过乘法将w转为1)
+
+
+L04
+
+1.欧拉角
+	(Pitch,Yaw,Roll)
+	
+	绕任意过原点的轴旋转
+	cos * I + （1 - cos）n * n（T） + sin * |0 -nz ny|
+										   |nz 0 -nx|
+										   |-ny nx 0|
+	
+	1.1 四元数
+2.观察矩阵
+	2.1 view
+		camera position + camera direction + up direction -> view
+		view = R(view) * T(view) 先把相机位置移到原点，再把相机方向转到-Z轴（坐标轴变换同TBN）
+	2.2 projection
+		2.2.1 ortho
+			把给定6个参数（l,r,b,t,n,f）表示的长方体移到原点(一般来说已经由view处理)并缩放为正则立方体[-1,1]
+		2.2.2 perspective
+			fov + aspect + n + f -> perspective
+			把平截头体挤压到长方体再执行与ortho相同的操作
+			|n 0 0 0|
+			|0 n 0 0|
+			|0 0 n+f -nf|
+			|0 0 1 0|
+			
+L05
+
+1.rasterize 光栅化 pixel 像素
+	1.1 视口变换 ndc->屏幕空间
+
+L06
+
+
+1.走样
+	信号变化太快，采样频率跟不上
+2.反走样
+	先模糊再采样，反过来不行
+3.傅里叶变换 （数字图像处理）
+	时域  -  频域
+	3.1 滤波 = 卷积 = 平均
+		从频域中去掉某些特定的频率
+		时域的卷积等于频域的乘积，时域上的乘积等于频域上的卷积
+4.反走样
+	4.1 提高采样频率
+	4.2 先做低通滤波，再采样
+	4.3 MSAA（解决的是对信号的模糊）
+	4.4 FXAA（后处理） TAA
+	4.5 超分辨率 SSAA DLSS（深度学习超采样）	
+	
+L07
+
+1. z-buffer 0~1
+
+2. Blinn-Phong
+	specular + diffuse + ambient
+	
+	Light Falloff 点光源能量随距离平方衰减（辐照度）
+	
+	Ld = kd(I/r*r)max(0,n*l)
+L08
+	Ls = ks(I/r*r)pow(max(0,n*h),shininess)
+	La = ka*Ia
+3. 着色频率 逐面（Flat） 逐顶点（Gouraud） 逐像素（Phong）
+L09
+4. 重心坐标（三角形差值）
+	（i,j,k）=> (Px,Py) = i(Ax,Ay)+j(Bx,By)+k(Cx,Cy) i+j+k=1 P在ABC所在平面
+	i j k 非负 P在三角形内
+	重心坐标可以根据，面积比算出，如 i = Spbc / (Spbc + Spab + Spac)
+	三角形重心的重心坐标为(1/3,1/3,1/3)
+	投影之后重心坐标可能会改变，所以应该先差值再投影
+		正交投影后不变，透视投影后改变
+		透视投影 前 -> 后
+				 k  -> wk 后重新归一化
+				 
+				 后 -> 前
+				 k  -> k/w 后重新归一化
+
+		透视投影做透视除法前， w分量为线性垂直深度
+		透视除法之后z分量（即 ndc的z分量）是1/w的线性函数值（与near和far有关）
+5. 纹理映射 texel纹素
+	Mipmap 快速，近似，方形     取当前像素上面和右边第一个像素，计算在纹理上对应多少纹素来计算Mipmap level
+	
+	各向异性过滤 nx 在水平或竖直上拉伸n倍
+	
+	
+L10
+
+1.Environmental Lighting 环境光照
+	Spherical Map -> Cube Map
+	
+2.凹凸贴图（如法线贴图）差值贴图
+	TBN矩阵实现世界空间和法线空间的转换（坐标系变换）
+3.噪声
+4.AO贴图
+5.几何
+	5.1 隐式几何
+		数学描述，而非直接表示顶点
+		判定点与几何的关系简单，存储少，但获取全部的顶点困难
+		距离函数
+L11
+	5.2 显示几何
+		实际的顶点
+		
+		点云，几何网格，曲面
+		
+		贝塞尔曲线（不止局限于同一平面）
+			二次贝塞尔曲线：三个控制点
+			对顶点做仿射变换后画出的贝塞尔曲线等于对原曲线做仿射变换
+			不会超过控制点组成的凸包
+		Cn连续：n阶导数连续
+		
+		B-splines B样条
+		NURBS
+		
+		曲面
+			贝塞尔曲面
+		网格细化 网格简化 正则化（尽量使三角形大小一致，为正三角形，减少细长的三角形）
+L12
+1. 细分
+	1.1 Loop细分	
+		一分四
+	1.2 Catmull-Clark细分
+2. 简化
+	1.1 边坍缩
+		二次误差度量
+
+
+L13
+
+1.Whitted_Style Ray Tracing
+	再每一个反射（或折射）点计算一次光源可见性
+	打到diffuse停止，打到specular反射
+	1.1 求交点
+		光线 ray(t) = o + td
+		1.1.1 对于隐式表面联立方程
+		1.1.2 对于显示表面求光线与三角形是否相交
+			Moller Trumbore Algorithm
+				o + td = iPa + jPb + kPc  (右式为重心坐标)
+			
+			与长方体求交 （用包围盒加速光线求交）
+				将长方形视为三对平行平面，求光线与三组平行平面的交点（tmin， tmax），对三组结果求交集
+L14
+
+1.加速结构
+	1.1 将场景分为均匀的格子，标记含几何表面的格子，光线沿方向与格子求交，遇到包含几何表面的格子进一步处理
+	1.2 空间划分
+		Oct-Tree 每次把一块区域八等分
+		KD-Tree 每次沿一条轴划分一次
+		BSP-Tree 非轴对齐划分
+	1.3 物体划分
+		BVH（Bounding Volume Hierarchy）
+2.辐射度量学
+	Radiant flux 辐射通量 W
+	intensity 辐射强度 W/sr 
+	irradiance 辐照度 W/(m*m) 与面积垂直
+	radiance 辐射度 W/(m*m*sr)
+L15
+
+1.BRDF
+	从某个方向入射的管线在某个方向上反射多少
+	BRDF = 辐射度/辐照度
+
+L16
+
+1.蒙特卡洛积分	
+	在积分域内采样，把积分视为矩形，多次采样求平均值
+	f(x)dx = 1/N sum(f(xi)/p(xi))
+2.Path Tracing
+	SPP 样本每像素
+	2.1 直接光照
+		func shade()
+		l = 0
+		for i in range n
+			ray tracing 
+			if ray hit light
+				l += fr * li * cos * 1/n
+	2.2 包含间接光照
+		func shade()
+		l = 0
+		for i in range n
+			ray tracing 
+			if ray hit light
+				l += fr * li * cos * 1/n
+			else if ray hit object
+				l+= fr * shade * cos * 1/n
+	2.3 光线生成
+		func genRay()
+		l = 0
+		for pos in pixel(n)
+			ray = pos - viewPos
+			ray tracing
+			if ray hit something
+				l += shade * 1/n
+	2.4 RR
+		设预计得到的结果为L0，继续打出射线的概率为P
+		如果打出光线，计结果为L0/P
+		如果不打出光线，结果则为0
+		计算数学期望 L = L0/P * P + (1 - P) * 0 = L0
+		
+		func shade()
+		p = random(0,1)
+		if p > p0
+			return 0
+		l = 0
+		for i in range n
+			ray tracing 
+			if ray hit light
+				l += fr * li * cos * 1/n
+			else if ray hit object
+				l+= fr * shade * cos * 1/n
+		l /= p0
+	2.5 对光源采样
+		把光源的dA投影到着色点的dw
+		dw = （dAcos（d，n'））/distance*distance
+		
+		把光照分为光源和非光源
+		
+		func shade()
+		
+		l_dir = li * fr * cos * cos'/ distance2 / pdf_light
+		
+		p = random(0,1)
+		if p > p0
+			return 0
+		l = 0
+		for i in range n
+			ray tracing 
+			if ray hit object
+				l+= fr * shade * cos * pdf
+		
+		return l_dir + l
+
+L17
+
+1.材质
+	材质 == BRDF
+	fr(diffuse) = albedo/PI 假设无能量损失
+	
+	glossy 带镜面反射，但不是镜子那种完全镜面反射
+	
+	1.1 Fresnel Term 菲涅尔项
+		R0 = ((n1-n2)/(n1+n2))2
+		R(x) = R0 + (1-R0)(1-cos(x))5
+	导体的折射率为复数
+	
+	1.2 微妙面模型
+		f(i,o) = (F(i,h)G(i,o,h)D(h))/(4*(n,i)*(n,o))
+		
+		各向同性和各向异性
+		
+		f(r->i) >= 0
+		f(r->i) = f(i->r)
+		sum(f(r->i)) <= 1
+
+
+L18
+
+1.无偏
+	1.1 BDPT 双向路径追踪
+	1.2 MLT
+
+2.有偏
+	2.1 Photon Mapping 光子映射
+	2.2 VCM
+	2.3 IR
+	
+3. 非表面模型
+	散射介质
+	毛发 人的头发和动物毛发的模型不同
+	颗粒
+4. 表面模型
+	次表面散射 BSSRDF
+	布料
+5. 程序化生成
+	噪声
+	
+
+L19
+
+1.小孔成像
+
+Field of View 视场
+
+2.透镜
+	1/f = 1/zi + 1/z0
+景深
+
+
+L20
+
+1.光场
+
+2.颜色
+	同色异谱
+	光线的spd与人眼的激发函数相乘得到（s,m,l）
+	加色系统，减色系统
+
+L21
+
+
+1.动画
+	关键帧动画
+	
+2.仿真
+	布料
+	流体
+	头发
+	
+	质点弹簧系统
+	
+	运动学
+		正运动学
+		逆运动学
+L22
+
+1.粒子模拟
+	1.1 欧拉方法
+		不稳定，误差
+		
+		1.1.1 解决方法
+			中点法 使用原先运动位置的中点的速度
+			自适应步长
+			隐式欧拉方法 用下一个时刻的速度
+			Runge-Kutta Families
+			Position-Based/Verlet Integration
+2.刚体模拟
+3.流体模拟
+	3.1 拉格朗日法
+	
+	3.1 欧拉法
+
+
+补充：
+	齐次坐标裁切的6个平面：
+		x+w >= 0,  w-x >= 0,
+		y+w >= 0,  w-y >= 0,
+		z+w >= 0,  w-z >= 0
+		https://zhuanlan.zhihu.com/p/102758967
