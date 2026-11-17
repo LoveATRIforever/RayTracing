@@ -1,6 +1,7 @@
 #include"Test.h"
 #include"Triangle.h"
 #include"Cube.h"
+#include"Box.h"
 #include"Line.h"
 #include"Point.h"
 #include"imgui.h"
@@ -16,6 +17,7 @@ Test::Test()
 	m_CubeShader = std::make_shared<Cube>();
 	m_LineShader = std::make_shared<Line>();
 	m_PointShader = std::make_shared<Point>();
+	m_BoxShader = std::make_shared<Box>();
 	m_Renderer.SetColorAttachment(m_ColorAttachment);
 	m_Renderer.SetDepthAttachment(m_DepthAttachment);
 	m_Texture1 = std::make_shared<Texture>("assets/texture/img3.png");
@@ -47,6 +49,9 @@ void Test::Render(float tick)
 	case 2:
 		DrawPoint();
 		break;
+	case 3:
+		DrawBox();
+		break;
 	}
 	ImGui::Begin("Viewport");
 	UpdateCamera(tick);
@@ -74,6 +79,11 @@ void Test::Render(float tick)
 		m_Renderer.SetShader(m_PointShader);
 	}
 
+	if (ImGui::RadioButton("Box", &example, 3))
+	{
+		m_Renderer.SetShader(m_BoxShader);
+	}
+
 	bool wireframe = m_Renderer.IsEnableWireframe();
 	if (ImGui::Checkbox("wireframe", &wireframe))
 	{
@@ -85,6 +95,12 @@ void Test::Render(float tick)
 	{
 		m_Renderer.EnableFaceCull(faceCull);
 	}
+
+	if (ImGui::Button("Reset Camera"))
+	{
+		m_Camera = EditorCamera(CameraType::ePerspective);
+	}
+
 	ImGui::End();
 }
 
@@ -106,7 +122,7 @@ void Test::DrawTriangle()
 	glTextureSubImage2D(m_OpenGLTexture, 0, 0, 0, m_ColorAttachment->Width(), m_ColorAttachment->Height(), GL_RGB, GL_UNSIGNED_BYTE, m_ColorAttachment->Data());
 }
 
-void Test::DrawCube()
+void Test::DrawBox()
 {
 	std::vector<float> vertex =
 	{
@@ -266,6 +282,81 @@ void Test::DrawPoint()
 	m_ColorAttachment->Clear();
 	m_DepthAttachment->Clear({ 1,0,0,0 });
 
+	m_Renderer.DrawIndexed(vertex, index);
+	glTextureSubImage2D(m_OpenGLTexture, 0, 0, 0, m_ColorAttachment->Width(), m_ColorAttachment->Height(), GL_RGB, GL_UNSIGNED_BYTE, m_ColorAttachment->Data());
+}
+
+void Test::DrawCube()
+{
+	std::vector<float> vertex =
+	{
+		// pos(x,y,z)            
+		// +X
+		 0.5f, -0.5f, -0.5f,     
+		 0.5f,  0.5f, -0.5f,     
+		 0.5f,  0.5f,  0.5f,     
+		 0.5f, -0.5f,  0.5f,     
+
+		 // -X
+		 -0.5f, -0.5f, -0.5f,    
+		 -0.5f, -0.5f,  0.5f,    
+		 -0.5f,  0.5f,  0.5f,    
+		 -0.5f,  0.5f, -0.5f,    
+
+		 // +Y
+		 -0.5f,  0.5f, -0.5f,    
+		 -0.5f,  0.5f,  0.5f,    
+		  0.5f,  0.5f,  0.5f,    
+		  0.5f,  0.5f, -0.5f,    
+
+		  // -Y
+		  -0.5f, -0.5f, -0.5f,   
+		   0.5f, -0.5f, -0.5f,   
+		   0.5f, -0.5f,  0.5f,   
+		  -0.5f, -0.5f,  0.5f,   
+
+		  // +Z
+		  -0.5f, -0.5f,  0.5f,   
+		   0.5f, -0.5f,  0.5f,   
+		   0.5f,  0.5f,  0.5f,   
+		  -0.5f,  0.5f,  0.5f,   
+
+		  // -Z
+		  -0.5f, -0.5f, -0.5f,   
+		  -0.5f,  0.5f, -0.5f,   
+		   0.5f,  0.5f, -0.5f,   
+		   0.5f, -0.5f, -0.5f   
+	};
+	std::vector<uint32_t> index =
+	{
+		0,  1,  2,   0,  2,  3,   // +X
+		4,  5,  6,   4,  6,  7,   // -X
+		8,  9, 10,   8, 10, 11,   // +Y
+		12, 13, 14,  12, 14, 15,   // -Y
+		16, 17, 18,  16, 18, 19,   // +Z
+		20, 21, 22,  20, 22, 23   // -Z
+	};
+
+	glm::vec3 viewPosition = m_Camera.m_Pos;
+
+	glm::mat4 model = glm::mat4(1);
+	glm::mat4 view = glm::lookAt(viewPosition, viewPosition + m_Camera.m_Front, glm::vec3(0.0f, 1.0f, 0.0f));
+	glm::mat4 projection = glm::perspective(glm::radians(45.0f), 800.0f / 600.0f, 0.1f, 100.0f);
+	struct UniformBufferObject
+	{
+		glm::mat4 projection;
+		glm::mat4 view;
+		glm::mat4 model;
+	};
+
+	UniformBufferObject ubo;
+	ubo.model = model;
+	ubo.view = view;
+	ubo.projection = projection;
+
+	m_Renderer.SetUniformBuffer((float*)&ubo, sizeof(UniformBufferObject));
+	m_ColorAttachment->Clear();
+	m_DepthAttachment->Clear({ 1,0,0,0 });
 	m_Renderer.DrawIndexed(vertex, index);
 	glTextureSubImage2D(m_OpenGLTexture, 0, 0, 0, m_ColorAttachment->Width(), m_ColorAttachment->Height(), GL_RGB, GL_UNSIGNED_BYTE, m_ColorAttachment->Data());
 }

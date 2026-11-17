@@ -10,5 +10,5 @@ public:
 	Metal(glm::vec3 albedo, float fuzz)
 		:m_Albedo(albedo), m_Fuzz(fuzz) {}
 
-	bool Scatter(Ray& ray, HitRecord& hitRecord, glm::vec3& attenuation, Ray& scattered) override;
+	bool Scatter(Ray& ray, HitRecord& hitRecord, ScatterRecord& scatterRecord) override;
 };

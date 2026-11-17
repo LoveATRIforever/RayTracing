@@ -13,4 +13,7 @@ public:
 	void Add(std::shared_ptr<Shape> shape) { m_Array.push_back(shape); m_BoundingBox.Add(shape->GetBoundingBox()); }
 	bool RayCheck(Ray& ray, HitRecord& hitRecord) override;
 
+	float PdfValue(const glm::vec3& ori, const glm::vec3& dir) override;
+	glm::vec3 Random(const glm::vec3& ori) override;
+	
 };

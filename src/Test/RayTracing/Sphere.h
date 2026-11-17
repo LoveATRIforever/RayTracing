@@ -14,4 +14,6 @@ public:
 	Sphere(glm::vec3 center, float radius, std::shared_ptr<Material> material);
 
 	bool RayCheck(Ray& ray, HitRecord& hitRecord) override;
+	float PdfValue(const glm::vec3& ori, const glm::vec3& dir) override;
+	glm::vec3 Random(const glm::vec3& ori) override;
 };

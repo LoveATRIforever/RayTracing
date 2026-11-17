@@ -4,6 +4,7 @@
 #include<memory>
 #include"SolidColor.h"
 
+
 class Lambertian :public Material
 {
 private:
@@ -15,5 +16,6 @@ public:
 		:m_Albedo(std::make_shared<SolidColor>(albedo)) {
 	}
 
-	bool Scatter(Ray& ray, HitRecord& hitRecord, glm::vec3& attenuation, Ray& scattered) override;
+	float ScatterPdf(Ray& ray, HitRecord& hitRecord, Ray& scattered) override;
+	bool Scatter(Ray& ray, HitRecord& hitRecord, ScatterRecord& scatterRecord) override;
 };

@@ -46,3 +46,15 @@ inline glm::vec3 RandomColor()
 {
 	return glm::vec3(Random01(), Random01(), Random01());
 }
+
+inline glm::vec3 RandomCosineDirection()
+{
+	float t1 = Random01();
+	float phi = t1 * 2 * 3.1416;;
+	float t2 = Random01();
+	glm::vec3 res;
+	res.x = glm::cos(phi) * glm::sqrt(t2);
+	res.y = glm::sin(phi) * glm::sqrt(t2);
+	res.z = glm::sqrt(1 - t2);
+	return res;
+}

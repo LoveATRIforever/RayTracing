@@ -9,6 +9,6 @@ public:
 	Isotropic(const glm::vec3& albedo)
 		:m_Albedo(albedo){ }
 
-
-	bool Scatter(Ray& ray, HitRecord& hitRecord, glm::vec3& attenuation, Ray& scattered) override;
+	float ScatterPdf(Ray& ray, HitRecord& hitRecord, Ray& scattered) override;
+	bool Scatter(Ray& ray, HitRecord& hitRecord, ScatterRecord& scatterRecord) override;
 };

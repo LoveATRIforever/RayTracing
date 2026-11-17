@@ -1,4 +1,6 @@
 #include "Sphere.h"
+#include"../../RayTracing/Random.h"
+#include"../../RayTracing/ONB.h"
 
 glm::vec2 ComputeSphereUV(const glm::vec3 direction)
 {
@@ -50,4 +52,32 @@ bool Sphere::RayCheck(Ray& ray, HitRecord& hitRecord)
     hitRecord.mat = m_Material;
     hitRecord.uv = ComputeSphereUV(hitRecord.normal);
     return true;
+}
+
+float Sphere::PdfValue(const glm::vec3& ori, const glm::vec3& dir)
+{
+    HitRecord record;
+    Ray ray(ori, dir);
+    if (!RayCheck(ray, record))
+        return 0;
+    glm::vec3 tmp = m_Center - ori;
+    float distance2 = glm::dot(tmp, tmp);
+    return 1 / (2 * 3.1416 * (1 - glm::sqrt(1 - m_Radius * m_Radius / distance2)));
+}
+
+glm::vec3 Sphere::Random(const glm::vec3& ori)
+{
+    glm::vec3 dir = m_Center - ori;
+    float distance2 = glm::dot(dir, dir);
+    float t1 = Random01();
+    float phi = t1 * 2 * 3.1416;
+    float t2 = Random01();
+    glm::vec3 res;
+    res.z = 1 - (1 - glm::sqrt(1 - m_Radius * m_Radius / distance2)) * t2;
+    float sin = glm::sqrt(1 - res.z * res.z);
+    res.x = sin * glm::cos(phi);
+    res.y = sin * glm::sin(phi);
+
+    ONB onb(glm::normalize(dir));
+    return onb.ToGlobal(res);
 }

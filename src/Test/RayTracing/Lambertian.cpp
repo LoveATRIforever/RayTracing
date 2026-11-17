@@ -2,6 +2,7 @@
 #include"../../RayTracing/Random.h"
 #include"../../RayTracing/HitRecord.h"
 #include"../../RayTracing/Ray.h"
+#include"Pdfs.h"
 
 inline bool Vec3NearZero(glm::vec3 vec)
 {
@@ -11,14 +12,19 @@ inline bool Vec3NearZero(glm::vec3 vec)
     return false;
 }
 
-bool Lambertian::Scatter(Ray& ray, HitRecord& hitRecord, glm::vec3& attenuation, Ray& scattered)
+float Lambertian::ScatterPdf(Ray& ray, HitRecord& hitRecord, Ray& scattered)
 {
-    attenuation = m_Albedo->Sample(hitRecord.uv, hitRecord.p);
-    glm::vec3 dir = RandomDirection() + hitRecord.normal;
-    if (Vec3NearZero(dir))
-    {
-        dir = hitRecord.normal;
-    }
-    scattered = Ray(hitRecord.p, glm::normalize(dir));
+    float cos = glm::dot(scattered.Direction(), hitRecord.normal);
+    if (cos < 0)
+        return 0;
+    else
+        return cos / 3.1416;
+}
+
+bool Lambertian::Scatter(Ray& ray, HitRecord& hitRecord, ScatterRecord& scatterRecord)
+{
+    scatterRecord.attenuation = m_Albedo->Sample(hitRecord.uv, hitRecord.p);
+    scatterRecord.pdf = std::make_shared<CosinePdf>(hitRecord.normal);
+    scatterRecord.skipPdf = false;
     return true;
 }

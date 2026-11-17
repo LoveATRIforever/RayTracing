@@ -11,5 +11,5 @@ public:
 	Dielectric(float ir)
 		:m_Ir(ir) {}
 
-	bool Scatter(Ray& ray, HitRecord& hitRecord, glm::vec3& attenuation, Ray& scattered) override;
+	bool Scatter(Ray& ray, HitRecord& hitRecord, ScatterRecord& scatterRecord) override;
 };

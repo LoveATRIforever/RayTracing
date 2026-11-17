@@ -10,6 +10,7 @@ struct HitRecord
 	float t;
 	glm::vec2 uv;
 	std::shared_ptr<Material> mat;
+	bool frontFace;
 
 	float minT;
 

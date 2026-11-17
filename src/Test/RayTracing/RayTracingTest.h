@@ -35,4 +35,7 @@ private:
 	void DrawCornellBox();
 	void DrawSmokeCornellBox();
 	void DrawFinal(int imageWidth, int sample, int depth, int scale);
+
+	void DrawCornellBox2();
+	void DrawCornellBox3();
 };

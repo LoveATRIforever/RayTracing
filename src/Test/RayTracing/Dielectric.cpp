@@ -12,15 +12,18 @@ inline float Reflectance(float cosine, float ref_idx)
 }
 
 
-bool Dielectric::Scatter(Ray& ray, HitRecord& hitRecord, glm::vec3& attenuation, Ray& scattered)
+bool Dielectric::Scatter(Ray& ray, HitRecord& hitRecord, ScatterRecord& scatterRecord)
 {
-    attenuation = glm::vec3(1);
+    scatterRecord.attenuation = glm::vec3(1);
+    scatterRecord.skipPdf = true;
+    scatterRecord.pdf = nullptr;
+
     float radio = glm::dot(hitRecord.normal, ray.Direction()) < 0 ? 1 / m_Ir : m_Ir;
     glm::vec3 v0 = (ray.Direction() - dot(ray.Direction(), hitRecord.normal) * hitRecord.normal) * radio;
     if (glm::dot(v0, v0) > 1 || Reflectance(glm::abs(glm::dot(hitRecord.normal, ray.Direction())), radio) > Random01())
     {
         glm::vec3 reflect = glm::vec3(-2 * glm::dot(ray.Direction(), hitRecord.normal)) * hitRecord.normal + ray.Direction();
-        scattered = Ray(hitRecord.p, reflect);
+        scatterRecord.ray = Ray(hitRecord.p, reflect);
         return true;
     }
     else
@@ -34,7 +37,7 @@ bool Dielectric::Scatter(Ray& ray, HitRecord& hitRecord, glm::vec3& attenuation,
         {
             v1 = glm::sqrt(1 - glm::dot(v0, v0)) * -hitRecord.normal;
         }
-        scattered = Ray(hitRecord.p, v1 + v0);
+        scatterRecord.ray = Ray(hitRecord.p, v1 + v0);
         return true;
     }
 }

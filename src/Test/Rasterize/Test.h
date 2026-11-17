@@ -13,6 +13,7 @@ private:
 	std::shared_ptr<Shader> m_CubeShader;
 	std::shared_ptr<Shader> m_LineShader;
 	std::shared_ptr<Shader> m_PointShader;
+	std::shared_ptr<Shader> m_BoxShader;
 
 	std::shared_ptr<Texture> m_Texture1;
 	std::shared_ptr<Texture> m_Texture2;
@@ -34,6 +35,7 @@ private:
 	void DrawCube();
 	void DrawLine();
 	void DrawPoint();
+	void DrawBox();
 
 	void CreateOpenGLTextureForColorAttachment();
 	void UpdateCamera(float tick);

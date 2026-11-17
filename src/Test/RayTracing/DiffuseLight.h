@@ -13,6 +13,6 @@ public:
 	DiffuseLight(std::shared_ptr<RTexture> tex)
 		:m_Emit(tex){ }
 
-	bool Scatter(Ray& ray, HitRecord& hitRecord, glm::vec3& attenuation, Ray& scattered) override;
-	glm::vec3 Emitted(HitRecord& hitRecord) override;
+	bool Scatter(Ray& ray, HitRecord& hitRecord, ScatterRecord& scatterRecord) override;
+	glm::vec3 Emitted(Ray& ray, HitRecord& hitRecord) override;
 };

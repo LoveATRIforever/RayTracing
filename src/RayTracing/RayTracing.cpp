@@ -5,6 +5,7 @@
 #include<mutex>
 #include<iostream>
 #include<format>
+#include"../Test/RayTracing/Pdfs.h"
 
 RayTracing::RayTracing()
 {
@@ -148,11 +149,34 @@ glm::vec4 RayTracing::RayColor(Ray ray, int depth)
 	if (m_Shape->RayCheck(ray, record))
 	{
 		Ray newRay;
-		glm::vec3 attenuation;
-		glm::vec3 emit = record.mat->Emitted(record);
-		if (record.mat->Scatter(ray, record, attenuation, newRay))
-			return glm::vec4(attenuation, 1.0f) * RayColor(newRay, depth + 1) + glm::vec4(emit, 1);
-		return glm::vec4(record.mat->Emitted(record), 1.0f);
+		ScatterRecord scatter;
+		float pdfValue;
+		std::shared_ptr<Pdf> pdf;
+		
+		glm::vec3 emit = record.mat->Emitted(ray, record);
+		
+		if (!record.mat->Scatter(ray, record, scatter))
+			return glm::vec4(emit, 1.0f);
+		
+		if (scatter.skipPdf)
+			return glm::vec4(scatter.attenuation, 1.0f) * RayColor(scatter.ray, depth + 1);
+		
+		if (m_Light)
+		{
+			auto lightPdf = std::make_shared<ShapePdf>(m_Light, record.p);
+			pdf = std::make_shared<MixturePdf>(lightPdf, scatter.pdf);
+		}
+		else
+		{
+			pdf = scatter.pdf;
+		}
+		
+		newRay = Ray(record.p, pdf->Gen());
+		pdfValue = pdf->Value(newRay.Direction());
+
+		float scatterPdf = record.mat->ScatterPdf(ray, record, newRay);
+		
+		return glm::vec4(scatter.attenuation * scatterPdf / pdfValue, 1.0f) * RayColor(newRay, depth + 1) + glm::vec4(emit, 1);
 	}
 	else
 	{

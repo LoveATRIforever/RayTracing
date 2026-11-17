@@ -44,5 +44,16 @@ protected:
 public:
 	virtual bool RayCheck(Ray& ray, HitRecord& hitRecord) = 0;
 
+	virtual float PdfValue(const glm::vec3& ori, const glm::vec3& dir)
+	{
+		return 0;
+	}
+
+	virtual glm::vec3 Random(const glm::vec3& ori)
+	{
+		return glm::vec3(1, 0, 0);
+	}
+
 	BoundingBox GetBoundingBox() { return m_BoundingBox; }
+
 };

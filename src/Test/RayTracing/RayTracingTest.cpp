@@ -53,6 +53,8 @@ inline std::string GetExampleName(int32_t example)
 	case 7:	return "SmokeCornellBox";
 	case 8:	return "Final";
 	case 9:	return "SuperFinal";
+	case 10: return "CornellBox2";
+	case 11: return "CornellBox3";
 	}
 }
 
@@ -133,6 +135,17 @@ void RayTracingTest::Render(float tick)
 		DrawFinal(800, 10000, 40, 1);
 	}
 
+	ImGui::Text("Sample on Light");
+	if (ImGui::RadioButton("CornellBox2", &m_Example, 10))
+	{
+		DrawCornellBox2();
+	}
+	ImGui::SameLine();
+	if (ImGui::RadioButton("CornellBox3", &m_Example, 11))
+	{
+		DrawCornellBox3();
+	}
+
 	ImGui::Text("Setting:");
 	if (ImGui::Checkbox("Jittering", &m_RayTracing.m_EnableJittering))
 	{
@@ -176,6 +189,7 @@ void RayTracingTest::DrawSphere()
 	shapeArray->Add(std::make_shared<Sphere>(glm::vec3(-1, 0, -1), -0.4, std::make_shared<Dielectric>(1.5)));
 	shapeArray->Add(std::make_shared<Sphere>(glm::vec3(1, 0, -1), 0.5, std::make_shared<Metal>(glm::vec3(0.8, 0.6, 0.2),0.0)));
 
+	m_RayTracing.SetLight(nullptr);
 	m_RayTracing.m_SamplePerPixel = 500;
 	m_RayTracing.m_MaxDepth = 50;
 	m_RayTracing.m_Fov = 90;
@@ -194,6 +208,7 @@ void RayTracingTest::DrawEarth()
 {
 	auto earth = std::make_shared<Sphere>(glm::vec3(0, 0, 0), 2, std::make_shared<Lambertian>(std::make_shared<ImageTexture>("assets/texture/earthmap.jpg")));
 
+	m_RayTracing.SetLight(nullptr);
 	m_RayTracing.m_SamplePerPixel = 100;
 	m_RayTracing.m_MaxDepth = 50;
 	m_RayTracing.m_Fov = 20;
@@ -249,6 +264,7 @@ void RayTracingTest::DrawManySphere()
 	shapes.push_back(std::make_shared<Sphere>(glm::vec3(-4, 1, 0), 1, std::make_shared<Lambertian>(glm::vec3(0.4, 0.2, 0.1))));
 	shapes.push_back(std::make_shared<Sphere>(glm::vec3(4, 1, 0), 1, std::make_shared<Metal>(glm::vec3(0.7, 0.6, 0.5), 0)));
 
+	m_RayTracing.SetLight(nullptr);
 	m_RayTracing.m_SamplePerPixel = 500;
 	m_RayTracing.m_MaxDepth = 50;
 	m_RayTracing.m_Fov = 20;
@@ -271,7 +287,7 @@ void RayTracingTest::DrawPerlin()
 	shapeArray->Add(std::make_shared<Sphere>(glm::vec3(0, -1000, 0), 1000, std::make_shared<Lambertian>(perlin)));
 	shapeArray->Add(std::make_shared<Sphere>(glm::vec3(0, 2, 0), 2, std::make_shared<Lambertian>(perlin)));
 
-
+	m_RayTracing.SetLight(nullptr);
 	m_RayTracing.m_SamplePerPixel = 500;
 	m_RayTracing.m_MaxDepth = 50;
 	m_RayTracing.m_Fov = 20;
@@ -295,7 +311,7 @@ void RayTracingTest::DrawQuad()
 	shapeArray->Add(std::make_shared<Quad>(glm::vec3(-2, 3, 1), glm::vec3(4, 0, 0), glm::vec3(0, 0, 4), std::make_shared<Lambertian>(glm::vec3(1, 0.5, 0.0))));
 	shapeArray->Add(std::make_shared<Quad>(glm::vec3(-2, -3, 5), glm::vec3(4, 0, 0), glm::vec3(0, 0, -4), std::make_shared<Lambertian>(glm::vec3(0.2, 0.8, 0.8))));
 
-
+	m_RayTracing.SetLight(nullptr);
 	m_RayTracing.m_SamplePerPixel = 100;
 	m_RayTracing.m_MaxDepth = 50;
 	m_RayTracing.m_Fov = 80;
@@ -320,6 +336,7 @@ void RayTracingTest::DrawSimpleLight()
 	shapeArray->Add(std::make_shared<Sphere>(glm::vec3(0, 7, 0), 2, std::make_shared<DiffuseLight>(glm::vec3(4))));
 	shapeArray->Add(std::make_shared<Quad>(glm::vec3(3, 1, -2), glm::vec3(2, 0, 0), glm::vec3(0, 2, 0), std::make_shared<DiffuseLight>(glm::vec3(4, 4, 4))));
 
+	m_RayTracing.SetLight(nullptr);
 	m_RayTracing.m_SamplePerPixel = 100;
 	m_RayTracing.m_MaxDepth = 50;
 	m_RayTracing.m_Fov = 20;
@@ -373,6 +390,8 @@ void RayTracingTest::DrawCornellBox()
 
 	shapeArray->Add(std::make_shared<Translate>(std::make_shared<RotateY>(CreateBox(glm::vec3(0, 0, 0), glm::vec3(165, 330, 165), white), 15), glm::vec3(265, 0, 295)));
 	shapeArray->Add(std::make_shared<Translate>(std::make_shared<RotateY>(CreateBox(glm::vec3(0, 0, 0), glm::vec3(165, 165, 165), white), -18), glm::vec3(130, 0, 65)));
+	
+	m_RayTracing.SetLight(nullptr);
 	m_RayTracing.m_SamplePerPixel = 200;
 	m_RayTracing.m_MaxDepth = 50;
 	m_RayTracing.m_Fov = 40;
@@ -406,6 +425,7 @@ void RayTracingTest::DrawSmokeCornellBox()
 	shapeArray->Add(std::make_shared<ConstantMedium>(std::make_shared<Translate>(std::make_shared<RotateY>(CreateBox(glm::vec3(0, 0, 0), glm::vec3(165, 330, 165), white), 15), glm::vec3(265, 0, 295)), 0.01, glm::vec3(0)));
 	shapeArray->Add(std::make_shared<ConstantMedium>(std::make_shared<Translate>(std::make_shared<RotateY>(CreateBox(glm::vec3(0, 0, 0), glm::vec3(165, 165, 165), white), -18), glm::vec3(130, 0, 65)), 0.01, glm::vec3(1)));
 	
+	m_RayTracing.SetLight(nullptr);
 	m_RayTracing.m_SamplePerPixel = 200;
 	m_RayTracing.m_MaxDepth = 50;
 	m_RayTracing.m_Fov = 40;
@@ -483,6 +503,7 @@ void RayTracingTest::DrawFinal(int imageWidth, int sample, int depth, int scale)
 	)
 	);
 
+	m_RayTracing.SetLight(nullptr);
 	m_RayTracing.m_SamplePerPixel = sample;
 	m_RayTracing.m_MaxDepth = depth;
 	m_RayTracing.m_Fov = 40;
@@ -495,6 +516,84 @@ void RayTracingTest::DrawFinal(int imageWidth, int sample, int depth, int scale)
 	m_RayTracing.SetShape(world);
 	ChangeColorAttachment(imageWidth, imageWidth);
 	m_ShowScale = scale;
+}
+
+void RayTracingTest::DrawCornellBox2()
+{
+	auto shapeArray = std::make_shared<ShapeArray>();
+
+	auto red = std::make_shared<Lambertian>(glm::vec3(.65, .05, .05));
+	auto white = std::make_shared<Lambertian>(glm::vec3(.73, .73, .73));
+	auto green = std::make_shared<Lambertian>(glm::vec3(.12, .45, .15));
+	auto light = std::make_shared<DiffuseLight>(glm::vec3(15));
+	auto metal = std::make_shared<Metal>(glm::vec3(0.8, 0.85, 0.88), 0.0);
+
+	shapeArray->Add(std::make_shared<Quad>(glm::vec3(555, 0, 0), glm::vec3(0, 555, 0), glm::vec3(0, 0, 555), green));
+	shapeArray->Add(std::make_shared<Quad>(glm::vec3(0, 0, 0), glm::vec3(0, 555, 0), glm::vec3(0, 0, 555), red));
+	shapeArray->Add(std::make_shared<Quad>(glm::vec3(343, 554, 332), glm::vec3(-130, 0, 0), glm::vec3(0, 0, -105), light));
+	shapeArray->Add(std::make_shared<Quad>(glm::vec3(0, 0, 0), glm::vec3(555, 0, 0), glm::vec3(0, 0, 555), white));
+	shapeArray->Add(std::make_shared<Quad>(glm::vec3(555, 555, 555), glm::vec3(-555, 0, 0), glm::vec3(0, 0, -555), white));
+	shapeArray->Add(std::make_shared<Quad>(glm::vec3(0, 0, 555), glm::vec3(555, 0, 0), glm::vec3(0, 555, 0), white));
+
+	shapeArray->Add(std::make_shared<Translate>(std::make_shared<RotateY>(CreateBox(glm::vec3(0, 0, 0), glm::vec3(165, 330, 165), metal), 15), glm::vec3(265, 0, 295)));
+	shapeArray->Add(std::make_shared<Translate>(std::make_shared<RotateY>(CreateBox(glm::vec3(0, 0, 0), glm::vec3(165, 165, 165), white), -18), glm::vec3(130, 0, 65)));
+
+	auto lightShape = std::make_shared<Quad>(glm::vec3(343, 554, 332), glm::vec3(-130, 0, 0), glm::vec3(0, 0, -105), std::make_shared<Lambertian>(glm::vec3(0)));
+	m_RayTracing.SetLight(lightShape);
+
+	m_RayTracing.m_SamplePerPixel = 500;
+	m_RayTracing.m_MaxDepth = 30;
+	m_RayTracing.m_Fov = 40;
+	m_RayTracing.m_CameraPosition = glm::vec3(278, 278, -800);
+	m_RayTracing.m_LookAt = glm::vec3(278, 278, 0);
+	m_RayTracing.m_DefocusAngle = 0;
+	m_RayTracing.m_FocusDistance = 1;
+	m_RayTracing.m_BkColor = glm::vec3(0);
+
+	m_RayTracing.SetShape(shapeArray);
+	ChangeColorAttachment(600, 600);
+	m_ShowScale = 2;
+}
+
+void RayTracingTest::DrawCornellBox3()
+{
+	auto shapeArray = std::make_shared<ShapeArray>();
+
+	auto red = std::make_shared<Lambertian>(glm::vec3(.65, .05, .05));
+	auto white = std::make_shared<Lambertian>(glm::vec3(.73, .73, .73));
+	auto green = std::make_shared<Lambertian>(glm::vec3(.12, .45, .15));
+	auto light = std::make_shared<DiffuseLight>(glm::vec3(15));
+	auto glass = std::make_shared<Dielectric>(1.5);
+
+	shapeArray->Add(std::make_shared<Quad>(glm::vec3(555, 0, 0), glm::vec3(0, 555, 0), glm::vec3(0, 0, 555), green));
+	shapeArray->Add(std::make_shared<Quad>(glm::vec3(0, 0, 0), glm::vec3(0, 555, 0), glm::vec3(0, 0, 555), red));
+	shapeArray->Add(std::make_shared<Quad>(glm::vec3(343, 554, 332), glm::vec3(-130, 0, 0), glm::vec3(0, 0, -105), light));
+	shapeArray->Add(std::make_shared<Quad>(glm::vec3(0, 0, 0), glm::vec3(555, 0, 0), glm::vec3(0, 0, 555), white));
+	shapeArray->Add(std::make_shared<Quad>(glm::vec3(555, 555, 555), glm::vec3(-555, 0, 0), glm::vec3(0, 0, -555), white));
+	shapeArray->Add(std::make_shared<Quad>(glm::vec3(0, 0, 555), glm::vec3(555, 0, 0), glm::vec3(0, 555, 0), white));
+
+	shapeArray->Add(std::make_shared<Translate>(std::make_shared<RotateY>(CreateBox(glm::vec3(0, 0, 0), glm::vec3(165, 330, 165), white), 15), glm::vec3(265, 0, 295)));
+	auto sphere = std::make_shared<Sphere>(glm::vec3(190, 90, 190), 90, glass);
+	shapeArray->Add(sphere);
+
+	auto lightShape = std::make_shared<Quad>(glm::vec3(343, 554, 332), glm::vec3(-130, 0, 0), glm::vec3(0, 0, -105), std::make_shared<Lambertian>(glm::vec3(0)));
+	auto lightList = std::make_shared<ShapeArray>();
+	lightList->Add(lightShape);
+	lightList->Add(sphere);
+	m_RayTracing.SetLight(lightList);
+
+	m_RayTracing.m_SamplePerPixel = 500;
+	m_RayTracing.m_MaxDepth = 30;
+	m_RayTracing.m_Fov = 40;
+	m_RayTracing.m_CameraPosition = glm::vec3(278, 278, -800);
+	m_RayTracing.m_LookAt = glm::vec3(278, 278, 0);
+	m_RayTracing.m_DefocusAngle = 0;
+	m_RayTracing.m_FocusDistance = 1;
+	m_RayTracing.m_BkColor = glm::vec3(0);
+
+	m_RayTracing.SetShape(shapeArray);
+	ChangeColorAttachment(600, 600);
+	m_ShowScale = 2;
 }
 
 void RayTracingTest::CopyTextureData()

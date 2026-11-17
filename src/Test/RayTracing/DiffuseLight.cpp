@@ -1,12 +1,16 @@
 #include "DiffuseLight.h"
 #include"../../RayTracing/HitRecord.h"
+#include"../../RayTracing/Ray.h"
 
-bool DiffuseLight::Scatter(Ray& ray, HitRecord& hitRecord, glm::vec3& attenuation, Ray& scattered)
+bool DiffuseLight::Scatter(Ray& ray, HitRecord& hitRecord, ScatterRecord& scatterRecord)
 {
     return false;
 }
 
-glm::vec3 DiffuseLight::Emitted(HitRecord& hitRecord)
+glm::vec3 DiffuseLight::Emitted(Ray& ray, HitRecord& hitRecord)
 {
-    return m_Emit->Sample(hitRecord.uv, hitRecord.p);
+    if (hitRecord.frontFace)
+        return m_Emit->Sample(hitRecord.uv, hitRecord.p);
+    else
+        return glm::vec3(0);
 }

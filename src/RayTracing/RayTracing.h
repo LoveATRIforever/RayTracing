@@ -11,6 +11,7 @@ private:
 	std::shared_ptr<Texture> m_ColorAttachment;
 
 	std::shared_ptr<Shape> m_Shape;
+	std::shared_ptr<Shape> m_Light;
 
 public:
 	int32_t m_SamplePerPixel = 100;
@@ -36,6 +37,7 @@ public:
 	void Draw();
 	void SetColorAttachment(std::shared_ptr<Texture> attachment) { m_ColorAttachment = attachment; }
 	void SetShape(std::shared_ptr<Shape> shape) { m_Shape = shape; }
+	void SetLight(std::shared_ptr<Shape> light) { m_Light = light; }
 
 	glm::vec4 RayColor(Ray ray, int depth = 0);
 };

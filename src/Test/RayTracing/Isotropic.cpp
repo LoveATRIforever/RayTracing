@@ -2,10 +2,17 @@
 #include"../../RayTracing/Random.h"
 #include"../../RayTracing/Ray.h"
 #include"../../RayTracing/HitRecord.h"
+#include"Pdfs.h"
 
-bool Isotropic::Scatter(Ray& ray, HitRecord& hitRecord, glm::vec3& attenuation, Ray& scattered)
+float Isotropic::ScatterPdf(Ray& ray, HitRecord& hitRecord, Ray& scattered)
 {
-    scattered = Ray(hitRecord.p, RandomDirection());
-    attenuation = m_Albedo;
+    return 1 / (4 * 3.1416);
+}
+
+bool Isotropic::Scatter(Ray& ray, HitRecord& hitRecord, ScatterRecord& scatterRecord)
+{
+    scatterRecord.attenuation = m_Albedo;
+    scatterRecord.pdf = std::make_shared<SpherePdf>();
+    scatterRecord.skipPdf = false;
     return true;
 }

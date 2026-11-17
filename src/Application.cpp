@@ -65,15 +65,36 @@ void  Application::Shutdown()
 void Application::Run()
 {
 	m_LastTimePointer = std::chrono::high_resolution_clock::now();
-	RayTracingTest test;
+	RayTracingTest rayTracing;
+	Test rasterize;
+	int example = 0;
 	while (!glfwWindowShouldClose(m_Window))
 	{
 		UpdateTick();
 		glfwPollEvents();
 		BeginImGuiFrame();
 
+		ImGui::Begin("Application");
+		if (ImGui::RadioButton("RayTracing", &example, 0))
+		{
+		}
+		if (ImGui::RadioButton("Rasterize", &example, 1))
+		{
+
+		}
+		ImGui::End();
+
+		switch (example)
+		{
+		case 0:
+			rayTracing.Render(m_Tick);
+			break;
+		case 1:
+			rasterize.Render(m_Tick);
+			break;
+		}
+		
 		Render();
-		test.Render(m_Tick);
 
 		ImGui::ShowDemoWindow();
 
